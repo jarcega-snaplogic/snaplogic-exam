@@ -5,17 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnapLogic Architect Certification Exam</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        .fade-enter {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        .fade-enter-active {
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 300ms, transform 300ms;
-        }
-    </style>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -64,7 +53,7 @@
             <!-- Section 3: Practical -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-4">Section 3: Practical Question (10 Marks)</h2>
-                <div id="practical" class="p-4 rounded-lg transition-colors duration-300">
+                <div id="practical">
                     <!-- Practical question will be inserted here -->
                 </div>
             </div>
@@ -75,6 +64,12 @@
                     Submit Exam
                 </button>
             </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4">Exam Results</h2>
+            <div id="results-content"></div>
         </div>
     </div>
 
@@ -353,8 +348,44 @@
             
             // Show final score at the top
             const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'bg-white rounded-lg shadow-lg p-6 mb-6 fade-enter';
+            scoreDiv.className = 'bg-white rounded-lg shadow-lg p-6 mb-6';
             scoreDiv.innerHTML = `
                 <h2 class="text-2xl font-bold mb-4">Exam Results</h2>
                 <div class="grid grid-cols-2 gap-4 text-lg">
                     <div>
+                        <p>Total Score: <span class="font-bold">${correctAnswers}/${totalQuestions}</span></p>
+                    </div>
+                    <div>
+                        <p>Percentage: <span class="font-bold ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">${scorePercentage}%</span></p>
+                        <p class="text-sm ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">
+                            ${scorePercentage >= 70 ? 'Passed!' : 'Did not pass - 70% required'}
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // Insert score div at the top of the content
+            const examContent = document.getElementById('exam-content');
+            examContent.insertBefore(scoreDiv, examContent.firstChild);
+            
+            // Disable submit button
+            document.getElementById('submit-exam').disabled = true;
+            document.getElementById('submit-exam').classList.add('opacity-50');
+        }
+
+        // Initialize exam
+        document.getElementById('start-exam').addEventListener('click', () => {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('exam-content').classList.remove('hidden');
+            
+            createMultipleChoiceQuestions();
+            createShortAnswerQuestions();
+            createPracticalQuestion();
+            
+            startTimer();
+        });
+
+        document.getElementById('submit-exam').addEventListener('click', submitExam);
+    </script>
+</body>
+</html>
