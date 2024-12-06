@@ -82,7 +82,16 @@
             </div>
         </div>
     </div>
-
+    
+    <!-- Add this right after your exam content div, before the closing body tag -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-lg text-gray-700">Grading your exam...</p>
+            <p class="text-sm text-gray-500 mt-2">This may take up to 20 seconds</p>
+        </div>
+    </div>
+    
     <script>
         const examData = {
     multipleChoice: [
@@ -256,6 +265,15 @@ function createPracticalQuestion() {
 async function submitExam() {
     clearInterval(examTimer);
     
+    // Show loading overlay
+    const loadingOverlay = document.getElementById('loading-overlay');
+    loadingOverlay.classList.remove('hidden');
+    
+    // Disable submit button while processing
+    const submitButton = document.getElementById('submit-exam');
+    submitButton.disabled = true;
+    submitButton.classList.add('opacity-50');
+    
     // Prepare answers array
     let answersArray = [];
 
@@ -288,7 +306,6 @@ async function submitExam() {
         section: 'practical'
     });
 
-    // Send to API for grading
     try {
         const response = await fetch('https://prodeu-connectfasterinc-cloud-fm.emea.snaplogic.io/gateway/snapLogic/GradeExam', {
             method: 'POST',
@@ -304,10 +321,22 @@ async function submitExam() {
         }
 
         const results = await response.json();
+        
+        // Hide loading overlay
+        loadingOverlay.classList.add('hidden');
+        
+        // Show results
         showResults(results);
     } catch (error) {
+        // Hide loading overlay
+        loadingOverlay.classList.add('hidden');
+        
         console.error('Error submitting exam:', error);
         alert('There was an error submitting your exam. Please try again.');
+        
+        // Re-enable submit button in case of error
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-50');
     }
 }
 
