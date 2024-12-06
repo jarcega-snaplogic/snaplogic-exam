@@ -312,50 +312,76 @@ async function submitExam() {
 }
 
 function showResults(results) {
-    // Calculate total score
+    console.log('Results received:', results); // For debugging
+
+    // Parse the results if they're a string
+    if (typeof results === 'string') {
+        try {
+            results = JSON.parse(results);
+        } catch (error) {
+            console.error('Error parsing results:', error);
+            alert('Error processing exam results');
+            return;
+        }
+    }
+
+    // Ensure results is in the correct format (array)
+    if (!Array.isArray(results)) {
+        console.error('Results is not an array:', results);
+        alert('Invalid results format');
+        return;
+    }
+
+    // Calculate total score from the actual correct answers
     const totalQuestions = results.length;
-    const correctAnswers = results.filter(q => q.correct).length;
+    const correctAnswers = results.filter(q => q.correct === true).length; // Explicitly check for true
     const scorePercentage = (correctAnswers / totalQuestions * 100).toFixed(1);
     
     // Add feedback to each question
     results.forEach(result => {
+        const isCorrect = result.correct === true; // Explicitly check for true
+
+        let questionDiv;
         if (result.section === 'multipleChoice') {
-            const questionDiv = document.querySelector(`div[data-question-id="mc${result.questionId}"]`);
-            if (questionDiv) {
-                questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
-                
-                // Add feedback message
-                const feedbackDiv = document.createElement('div');
-                feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
-                feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
-                questionDiv.appendChild(feedbackDiv);
-            }
+            questionDiv = document.querySelector(`div[data-question-id="mc${result.questionId}"]`);
         } else if (result.section === 'shortAnswer') {
-            const questionDiv = document.querySelector(`div[data-question-id="sa${result.questionId}"]`);
-            if (questionDiv) {
-                questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
-                const textarea = questionDiv.querySelector('textarea');
-                textarea.disabled = true;
-                
-                // Add feedback message
-                const feedbackDiv = document.createElement('div');
-                feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
-                feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
-                questionDiv.appendChild(feedbackDiv);
-            }
+            questionDiv = document.querySelector(`div[data-question-id="sa${result.questionId}"]`);
         } else if (result.section === 'practical') {
-            const questionDiv = document.getElementById('practical');
-            if (questionDiv) {
-                questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
-                const textarea = questionDiv.querySelector('textarea');
-                textarea.disabled = true;
-                
-                // Add feedback message
-                const feedbackDiv = document.createElement('div');
-                feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
-                feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
-                questionDiv.appendChild(feedbackDiv);
+            questionDiv = document.getElementById('practical');
+        }
+
+        if (questionDiv) {
+            // Remove any existing feedback to avoid duplicates
+            const existingFeedback = questionDiv.querySelector('.feedback-message');
+            if (existingFeedback) {
+                existingFeedback.remove();
             }
+
+            // Clear existing background classes
+            questionDiv.classList.remove('bg-green-50', 'bg-red-50');
+            
+            // Add new background class based on correctness
+            questionDiv.classList.add(isCorrect ? 'bg-green-50' : 'bg-red-50');
+
+            // Disable inputs
+            const inputs = questionDiv.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+
+            // Add feedback message
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = `mt-2 p-2 rounded feedback-message ${
+                isCorrect ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'
+            }`;
+            
+            // Set feedback message
+            feedbackDiv.innerHTML = `
+                <p class="font-semibold">${isCorrect ? 'Correct!' : 'Incorrect'}</p>
+                ${result.feedback ? `<p class="mt-1">${result.feedback}</p>` : ''}
+            `;
+            
+            questionDiv.appendChild(feedbackDiv);
         }
     });
     
@@ -377,7 +403,7 @@ function showResults(results) {
         </div>
     `;
     
-    // Insert score div at the top of the content
+    // Insert score div at the top
     const examContent = document.getElementById('exam-content');
     examContent.insertBefore(scoreDiv, examContent.firstChild);
     
