@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SnapLogic Architect Certification Exam</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .fade-enter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .fade-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .question-transition {
+            transition: background-color 0.3s ease;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -34,6 +48,8 @@
 
         <!-- Exam Content -->
         <div id="exam-content" class="hidden">
+            <!-- Results will be inserted here -->
+            
             <!-- Section 1: Multiple Choice -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-4">Section 1: Multiple-Choice Questions (20 Marks)</h2>
@@ -53,339 +69,349 @@
             <!-- Section 3: Practical -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-4">Section 3: Practical Question (10 Marks)</h2>
-                <div id="practical">
+                <div id="practical" class="p-4 rounded-lg transition-colors duration-300">
                     <!-- Practical question will be inserted here -->
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="text-center">
+            <div class="text-center mb-8">
                 <button id="submit-exam" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors">
                     Submit Exam
                 </button>
             </div>
         </div>
-
-        <!-- Results Screen -->
-        <div id="results-screen" class="hidden bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-2xl font-bold mb-4">Exam Results</h2>
-            <div id="results-content"></div>
-        </div>
     </div>
 
-    <script>
+    <script src="exam.js">
         const examData = {
-            multipleChoice: [
-                {
-                    id: 1,
-                    question: "What is the primary purpose of SnapLogic?",
-                    options: [
-                        "Managing cloud storage",
-                        "Data integration and automation",
-                        "API development only",
-                        "File management"
-                    ],
-                    correct: 1
-                },
-                {
-                    id: 2,
-                    question: "Which Snap is commonly used to transform data in SnapLogic?",
-                    options: [
-                        "File Reader Snap",
-                        "Mapper Snap",
-                        "REST Get Snap",
-                        "Sort Snap"
-                    ],
-                    correct: 1
-                },
-                {
-                    id: 3,
-                    question: "In SnapLogic, what is a Pipeline?",
-                    options: [
-                        "A standalone application",
-                        "A sequence of interconnected Snaps for data processing",
-                        "A database connector",
-                        "A monitoring tool"
-                    ],
-                    correct: 1
-                },
-                {
-                    id: 4,
-                    question: "Which Snap is used to call a REST API?",
-                    options: [
-                        "SOAP Snap",
-                        "REST Get Snap",
-                        "Webhook Snap",
-                        "Email Snap"
-                    ],
-                    correct: 1
-                },
-                {
-                    id: 5,
-                    question: "How can you handle errors in SnapLogic Pipelines?",
-                    options: [
-                        "Using an Error Pipeline",
-                        "Manually restarting the pipeline",
-                        "Writing a custom script",
-                        "Adding more database connections"
-                    ],
-                    correct: 0
-                }
+    multipleChoice: [
+        {
+            id: 1,
+            question: "What is the primary purpose of SnapLogic?",
+            options: [
+                "Managing cloud storage",
+                "Data integration and automation",
+                "API development only",
+                "File management"
             ],
-            shortAnswer: [
-                {
-                    id: 1,
-                    question: "Explain how SnapLogic supports hybrid data integration.",
-                    marks: 5
-                },
-                {
-                    id: 2,
-                    question: "What are the key steps to optimize a SnapLogic pipeline for performance?",
-                    marks: 5
-                },
-                {
-                    id: 3,
-                    question: "Describe the role of the SnapLogic Control Plane.",
-                    marks: 5
-                },
-                {
-                    id: 4,
-                    question: "What is the use of the JSON Splitter Snap? Provide an example.",
-                    marks: 5
-                }
+            correct: 1
+        },
+        {
+            id: 2,
+            question: "Which Snap is commonly used to transform data in SnapLogic?",
+            options: [
+                "File Reader Snap",
+                "Mapper Snap",
+                "REST Get Snap",
+                "Sort Snap"
             ],
-            practical: {
-                question: `You are tasked with integrating an on-premises Oracle database with a cloud-based Salesforce instance. Describe how you would design a SnapLogic pipeline to:
-                • Extract customer data from Oracle.
-                • Transform the data to match Salesforce's schema.
-                • Load the transformed data into Salesforce.`,
-                marks: 10
-            }
-        };
-
-        let examTimer;
-        let timeRemaining = 60 * 60; // 60 minutes in seconds
-
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            correct: 1
+        },
+        {
+            id: 3,
+            question: "In SnapLogic, what is a Pipeline?",
+            options: [
+                "A standalone application",
+                "A sequence of interconnected Snaps for data processing",
+                "A database connector",
+                "A monitoring tool"
+            ],
+            correct: 1
+        },
+        {
+            id: 4,
+            question: "Which Snap is used to call a REST API?",
+            options: [
+                "SOAP Snap",
+                "REST Get Snap",
+                "Webhook Snap",
+                "Email Snap"
+            ],
+            correct: 1
+        },
+        {
+            id: 5,
+            question: "How can you handle errors in SnapLogic Pipelines?",
+            options: [
+                "Using an Error Pipeline",
+                "Manually restarting the pipeline",
+                "Writing a custom script",
+                "Adding more database connections"
+            ],
+            correct: 0
         }
-
-        function startTimer() {
-            const timerElement = document.getElementById('timer');
-            examTimer = setInterval(() => {
-                timeRemaining--;
-                timerElement.textContent = `Time Remaining: ${formatTime(timeRemaining)}`;
-                
-                if (timeRemaining <= 300) { // Last 5 minutes
-                    timerElement.classList.add('animate-pulse');
-                }
-                
-                if (timeRemaining <= 0) {
-                    clearInterval(examTimer);
-                    submitExam();
-                }
-            }, 1000);
+    ],
+    shortAnswer: [
+        {
+            id: 1,
+            question: "Explain how SnapLogic supports hybrid data integration.",
+            marks: 5
+        },
+        {
+            id: 2,
+            question: "What are the key steps to optimize a SnapLogic pipeline for performance?",
+            marks: 5
+        },
+        {
+            id: 3,
+            question: "Describe the role of the SnapLogic Control Plane.",
+            marks: 5
+        },
+        {
+            id: 4,
+            question: "What is the use of the JSON Splitter Snap? Provide an example.",
+            marks: 5
         }
+    ],
+    practical: {
+        question: `You are tasked with integrating an on-premises Oracle database with a cloud-based Salesforce instance. Describe how you would design a SnapLogic pipeline to:
+        • Extract customer data from Oracle.
+        • Transform the data to match Salesforce's schema.
+        • Load the transformed data into Salesforce.`,
+        marks: 10
+    }
+};
 
-        function createMultipleChoiceQuestions() {
-            const container = document.getElementById('multiple-choice');
-            examData.multipleChoice.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'space-y-4 p-4 rounded-lg transition-colors duration-300';
-                questionDiv.dataset.questionId = `mc${q.id}`;
-                questionDiv.innerHTML = `
-                    <p class="font-semibold">${index + 1}. ${q.question}</p>
-                    <div class="space-y-2">
-                        ${q.options.map((option, i) => `
-                            <div class="flex items-center">
-                                <input type="radio" id="q${q.id}_${i}" name="q${q.id}" value="${i}" class="mr-2">
-                                <label for="q${q.id}_${i}">${option}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                container.appendChild(questionDiv);
-            });
+let examTimer;
+let timeRemaining = 60 * 60; // 60 minutes in seconds
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+    const timerElement = document.getElementById('timer');
+    timerElement.textContent = `Time Remaining: ${formatTime(timeRemaining)}`;
+    
+    examTimer = setInterval(() => {
+        timeRemaining--;
+        timerElement.textContent = `Time Remaining: ${formatTime(timeRemaining)}`;
+        
+        if (timeRemaining <= 300) { // Last 5 minutes
+            timerElement.classList.add('animate-pulse');
         }
-
-        function createShortAnswerQuestions() {
-            const container = document.getElementById('short-answer');
-            examData.shortAnswer.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'space-y-4 p-4 rounded-lg transition-colors duration-300';
-                questionDiv.dataset.questionId = `sa${q.id}`;
-                questionDiv.innerHTML = `
-                    <p class="font-semibold">${index + 1}. ${q.question} (${q.marks} marks)</p>
-                    <textarea
-                        class="w-full p-3 border rounded-lg h-32"
-                        id="sa${q.id}"
-                        placeholder="Type your answer here..."
-                    ></textarea>
-                `;
-                container.appendChild(questionDiv);
-            });
-        }
-
-        function createPracticalQuestion() {
-            const container = document.getElementById('practical');
-            container.innerHTML = `
-                <p class="font-semibold mb-4">Scenario:</p>
-                <p class="whitespace-pre-line mb-4">${examData.practical.question}</p>
-                <textarea
-                    class="w-full p-3 border rounded-lg h-48"
-                    id="practical-answer"
-                    placeholder="Type your answer here..."
-                ></textarea>
-            `;
-        }
-
-        async function submitExam() {
+        
+        if (timeRemaining <= 0) {
             clearInterval(examTimer);
-            
-            // Prepare answers array
-            let answersArray = [];
-
-            // Add multiple choice answers
-            examData.multipleChoice.forEach(q => {
-                const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
-                answersArray.push({
-                    questionText: q.question,
-                    questionId: q.id,
-                    answer: selected ? q.options[parseInt(selected.value)] : '',
-                    section: 'multipleChoice'
-                });
-            });
-
-            // Add short answer responses
-            examData.shortAnswer.forEach(q => {
-                answersArray.push({
-                    questionText: q.question,
-                    questionId: q.id,
-                    answer: document.getElementById(`sa${q.id}`).value,
-                    section: 'shortAnswer'
-                });
-            });
-
-            // Add practical question
-            answersArray.push({
-                questionText: examData.practical.question,
-                questionId: 'practical',
-                answer: document.getElementById('practical-answer').value,
-                section: 'practical'
-            });
-
-            // Send to API for grading
-            try {
-                const response = await fetch('https://prodeu-connectfasterinc-cloud-fm.emea.snaplogic.io/gateway/snapLogic/GradeExam', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer 2glaJ9HxkewhNKcOuJnb3vEBpzZHNZ8A'
-                    },
-                    body: JSON.stringify(answersArray)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to submit exam');
-                }
-
-                showResults(await response.json());
-            } catch (error) {
-                console.error('Error submitting exam:', error);
-                alert('There was an error submitting your exam. Please try again.');
-            }
+            submitExam();
         }
+    }, 1000);
+}
 
-        function showResults(results) {
-            // Calculate total score
-            const totalQuestions = results.length;
-            const correctAnswers = results.filter(q => q.correct).length;
-            const scorePercentage = (correctAnswers / totalQuestions * 100).toFixed(1);
-            
-            // Add feedback to each question
-            results.forEach(result => {
-                if (result.section === 'multipleChoice') {
-                    const questionDiv = document.querySelector(`div[data-question-id="mc${result.questionId}"]`);
-                    if (questionDiv) {
-                        questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
-                        
-                        // Add feedback message
-                        const feedbackDiv = document.createElement('div');
-                        feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
-                        feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
-                        questionDiv.appendChild(feedbackDiv);
-                    }
-                } else if (result.section === 'shortAnswer') {
-                    const questionDiv = document.querySelector(`div[data-question-id="sa${result.questionId}"]`);
-                    if (questionDiv) {
-                        questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
-                        const textarea = questionDiv.querySelector('textarea');
-                        textarea.disabled = true;
-                        
-                        // Add feedback message
-                        const feedbackDiv = document.createElement('div');
-                        feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
-                        feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
-                        questionDiv.appendChild(feedbackDiv);
-                    }
-                } else if (result.section === 'practical') {
-                    const questionDiv = document.getElementById('practical');
-                    if (questionDiv) {
-                        questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
-                        const textarea = questionDiv.querySelector('textarea');
-                        textarea.disabled = true;
-                        
-                        // Add feedback message
-                        const feedbackDiv = document.createElement('div');
-                        feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
-                        feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
-                        questionDiv.appendChild(feedbackDiv);
-                    }
-                }
-            });
-            
-            // Show final score at the top
-            const scoreDiv = document.createElement('div');
-            scoreDiv.className = 'bg-white rounded-lg shadow-lg p-6 mb-6';
-            scoreDiv.innerHTML = `
-                <h2 class="text-2xl font-bold mb-4">Exam Results</h2>
-                <div class="grid grid-cols-2 gap-4 text-lg">
-                    <div>
-                        <p>Total Score: <span class="font-bold">${correctAnswers}/${totalQuestions}</span></p>
+function createMultipleChoiceQuestions() {
+    const container = document.getElementById('multiple-choice');
+    examData.multipleChoice.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'space-y-4 p-4 rounded-lg question-transition';
+        questionDiv.dataset.questionId = `mc${q.id}`;
+        questionDiv.innerHTML = `
+            <p class="font-semibold">${index + 1}. ${q.question}</p>
+            <div class="space-y-2">
+                ${q.options.map((option, i) => `
+                    <div class="flex items-center">
+                        <input type="radio" id="q${q.id}_${i}" name="q${q.id}" value="${i}" class="mr-2">
+                        <label for="q${q.id}_${i}">${option}</label>
                     </div>
-                    <div>
-                        <p>Percentage: <span class="font-bold ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">${scorePercentage}%</span></p>
-                        <p class="text-sm ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">
-                            ${scorePercentage >= 70 ? 'Passed!' : 'Did not pass - 70% required'}
-                        </p>
-                    </div>
-                </div>
-            `;
-            
-            // Insert score div at the top of the content
-            const examContent = document.getElementById('exam-content');
-            examContent.insertBefore(scoreDiv, examContent.firstChild);
-            
-            // Disable submit button
-            document.getElementById('submit-exam').disabled = true;
-            document.getElementById('submit-exam').classList.add('opacity-50');
-        }
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(questionDiv);
+    });
+}
 
-        // Initialize exam
-        document.getElementById('start-exam').addEventListener('click', () => {
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('exam-content').classList.remove('hidden');
-            
-            createMultipleChoiceQuestions();
-            createShortAnswerQuestions();
-            createPracticalQuestion();
-            
-            startTimer();
+function createShortAnswerQuestions() {
+    const container = document.getElementById('short-answer');
+    examData.shortAnswer.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'space-y-4 p-4 rounded-lg question-transition';
+        questionDiv.dataset.questionId = `sa${q.id}`;
+        questionDiv.innerHTML = `
+            <p class="font-semibold">${index + 1}. ${q.question} (${q.marks} marks)</p>
+            <textarea
+                class="w-full p-3 border rounded-lg h-32"
+                id="sa${q.id}"
+                placeholder="Type your answer here..."
+            ></textarea>
+        `;
+        container.appendChild(questionDiv);
+    });
+}
+
+function createPracticalQuestion() {
+    const container = document.getElementById('practical');
+    container.innerHTML = `
+        <p class="font-semibold mb-4">Scenario:</p>
+        <p class="whitespace-pre-line mb-4">${examData.practical.question}</p>
+        <textarea
+            class="w-full p-3 border rounded-lg h-48"
+            id="practical-answer"
+            placeholder="Type your answer here..."
+        ></textarea>
+    `;
+}
+
+async function submitExam() {
+    clearInterval(examTimer);
+    
+    // Prepare answers array
+    let answersArray = [];
+
+    // Add multiple choice answers
+    examData.multipleChoice.forEach(q => {
+        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+        answersArray.push({
+            questionText: q.question,
+            questionId: q.id,
+            answer: selected ? q.options[parseInt(selected.value)] : '',
+            section: 'multipleChoice'
+        });
+    });
+
+    // Add short answer responses
+    examData.shortAnswer.forEach(q => {
+        answersArray.push({
+            questionText: q.question,
+            questionId: q.id,
+            answer: document.getElementById(`sa${q.id}`).value,
+            section: 'shortAnswer'
+        });
+    });
+
+    // Add practical question
+    answersArray.push({
+        questionText: examData.practical.question,
+        questionId: 'practical',
+        answer: document.getElementById('practical-answer').value,
+        section: 'practical'
+    });
+
+    // Send to API for grading
+    try {
+        const response = await fetch('https://prodeu-connectfasterinc-cloud-fm.emea.snaplogic.io/gateway/snapLogic/GradeExam', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 2glaJ9HxkewhNKcOuJnb3vEBpzZHNZ8A'
+            },
+            body: JSON.stringify(answersArray)
         });
 
-        document.getElementById('submit-exam').addEventListener('click', submitExam);
+        if (!response.ok) {
+            throw new Error('Failed to submit exam');
+        }
+
+        const results = await response.json();
+        showResults(results);
+    } catch (error) {
+        console.error('Error submitting exam:', error);
+        alert('There was an error submitting your exam. Please try again.');
+    }
+}
+
+function showResults(results) {
+    // Calculate total score
+    const totalQuestions = results.length;
+    const correctAnswers = results.filter(q => q.correct).length;
+    const scorePercentage = (correctAnswers / totalQuestions * 100).toFixed(1);
+    
+    // Add feedback to each question
+    results.forEach(result => {
+        if (result.section === 'multipleChoice') {
+            const questionDiv = document.querySelector(`div[data-question-id="mc${result.questionId}"]`);
+            if (questionDiv) {
+                questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
+                
+                // Add feedback message
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
+                feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
+                questionDiv.appendChild(feedbackDiv);
+            }
+        } else if (result.section === 'shortAnswer') {
+            const questionDiv = document.querySelector(`div[data-question-id="sa${result.questionId}"]`);
+            if (questionDiv) {
+                questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
+                const textarea = questionDiv.querySelector('textarea');
+                textarea.disabled = true;
+                
+                // Add feedback message
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
+                feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
+                questionDiv.appendChild(feedbackDiv);
+            }
+        } else if (result.section === 'practical') {
+            const questionDiv = document.getElementById('practical');
+            if (questionDiv) {
+                questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
+                const textarea = questionDiv.querySelector('textarea');
+                textarea.disabled = true;
+                
+                // Add feedback message
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
+                feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
+                questionDiv.appendChild(feedbackDiv);
+            }
+        }
+    });
+    
+    // Show final score at the top
+    const scoreDiv = document.createElement('div');
+    scoreDiv.className = 'bg-white rounded-lg shadow-lg p-6 mb-6 fade-enter';
+    scoreDiv.innerHTML = `
+        <h2 class="text-2xl font-bold mb-4">Exam Results</h2>
+        <div class="grid grid-cols-2 gap-4 text-lg">
+            <div>
+                <p>Total Score: <span class="font-bold">${correctAnswers}/${totalQuestions}</span></p>
+            </div>
+            <div>
+                <p>Percentage: <span class="font-bold ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">${scorePercentage}%</span></p>
+                <p class="text-sm ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">
+                    ${scorePercentage >= 70 ? 'Passed!' : 'Did not pass - 70% required'}
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // Insert score div at the top of the content
+    const examContent = document.getElementById('exam-content');
+    examContent.insertBefore(scoreDiv, examContent.firstChild);
+    
+    // Disable submit button
+    const submitButton = document.getElementById('submit-exam');
+    submitButton.disabled = true;
+    submitButton.classList.add('opacity-50');
+    
+    // Trigger animation
+    setTimeout(() => {
+        scoreDiv.classList.add('fade-enter-active');
+    }, 50);
+}
+
+// Initialize the exam when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const startButton = document.getElementById('start-exam');
+    const submitButton = document.getElementById('submit-exam');
+    const startScreen = document.getElementById('start-screen');
+    const examContent = document.getElementById('exam-content');
+
+    startButton.addEventListener('click', () => {
+        startScreen.classList.add('hidden');
+        examContent.classList.remove('hidden');
+        
+        createMultipleChoiceQuestions();
+        createShortAnswerQuestions();
+        createPracticalQuestion();
+        
+        startTimer();
+    });
+
+    submitButton.addEventListener('click', submitExam);
+});
     </script>
 </body>
 </html>
