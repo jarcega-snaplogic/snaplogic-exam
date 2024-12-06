@@ -262,7 +262,7 @@
 
             // Send to API for grading
             try {
-                const response = await fetch('https://emea.snaplogic.com/api/1/rest/slsched/feed/ConnectFasterInc/Jocelyn/shared/GradeExam', {
+                const response = await fetch('https://emea-linux-gplex-trigger.snaplogic-demo.com/api/1/rest/feed/run/task/ConnectFasterInc/Jocelyn/shared/GradeExam', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
