@@ -193,7 +193,8 @@
             const container = document.getElementById('multiple-choice');
             examData.multipleChoice.forEach((q, index) => {
                 const questionDiv = document.createElement('div');
-                questionDiv.className = 'space-y-4';
+                questionDiv.className = 'space-y-4 p-4 rounded-lg transition-colors duration-300';
+                questionDiv.dataset.questionId = `mc${q.id}`;
                 questionDiv.innerHTML = `
                     <p class="font-semibold">${index + 1}. ${q.question}</p>
                     <div class="space-y-2">
@@ -213,7 +214,8 @@
             const container = document.getElementById('short-answer');
             examData.shortAnswer.forEach((q, index) => {
                 const questionDiv = document.createElement('div');
-                questionDiv.className = 'space-y-4';
+                questionDiv.className = 'space-y-4 p-4 rounded-lg transition-colors duration-300';
+                questionDiv.dataset.questionId = `sa${q.id}`;
                 questionDiv.innerHTML = `
                     <p class="font-semibold">${index + 1}. ${q.question} (${q.marks} marks)</p>
                     <textarea
@@ -242,22 +244,36 @@
         async function submitExam() {
             clearInterval(examTimer);
             
-            // Collect all answers
-            const answers = {
-                multipleChoice: {},
-                shortAnswer: {},
-                practical: document.getElementById('practical-answer').value
-            };
+            // Prepare answers array
+            let answersArray = [];
 
-            // Collect multiple choice answers
+            // Add multiple choice answers
             examData.multipleChoice.forEach(q => {
                 const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
-                answers.multipleChoice[q.id] = selected ? parseInt(selected.value) : null;
+                answersArray.push({
+                    questionText: q.question,
+                    questionId: q.id,
+                    answer: selected ? q.options[parseInt(selected.value)] : '',
+                    section: 'multipleChoice'
+                });
             });
 
-            // Collect short answer responses
+            // Add short answer responses
             examData.shortAnswer.forEach(q => {
-                answers.shortAnswer[q.id] = document.getElementById(`sa${q.id}`).value;
+                answersArray.push({
+                    questionText: q.question,
+                    questionId: q.id,
+                    answer: document.getElementById(`sa${q.id}`).value,
+                    section: 'shortAnswer'
+                });
+            });
+
+            // Add practical question
+            answersArray.push({
+                questionText: examData.practical.question,
+                questionId: 'practical',
+                answer: document.getElementById('practical-answer').value,
+                section: 'practical'
             });
 
             // Send to API for grading
@@ -268,7 +284,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer 2glaJ9HxkewhNKcOuJnb3vEBpzZHNZ8A'
                     },
-                    body: JSON.stringify(answers)
+                    body: JSON.stringify(answersArray)
                 });
 
                 if (!response.ok) {
@@ -283,20 +299,78 @@
         }
 
         function showResults(results) {
-            document.getElementById('exam-content').classList.add('hidden');
+            // Calculate total score
+            const totalQuestions = results.length;
+            const correctAnswers = results.filter(q => q.correct).length;
+            const scorePercentage = (correctAnswers / totalQuestions * 100).toFixed(1);
             
-            const resultsScreen = document.getElementById('results-screen');
-            const resultsContent = document.getElementById('results-content');
+            // Add feedback to each question
+            results.forEach(result => {
+                if (result.section === 'multipleChoice') {
+                    const questionDiv = document.querySelector(`div[data-question-id="mc${result.questionId}"]`);
+                    if (questionDiv) {
+                        questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
+                        
+                        // Add feedback message
+                        const feedbackDiv = document.createElement('div');
+                        feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
+                        feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
+                        questionDiv.appendChild(feedbackDiv);
+                    }
+                } else if (result.section === 'shortAnswer') {
+                    const questionDiv = document.querySelector(`div[data-question-id="sa${result.questionId}"]`);
+                    if (questionDiv) {
+                        questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
+                        const textarea = questionDiv.querySelector('textarea');
+                        textarea.disabled = true;
+                        
+                        // Add feedback message
+                        const feedbackDiv = document.createElement('div');
+                        feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
+                        feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
+                        questionDiv.appendChild(feedbackDiv);
+                    }
+                } else if (result.section === 'practical') {
+                    const questionDiv = document.getElementById('practical');
+                    if (questionDiv) {
+                        questionDiv.classList.add(result.correct ? 'bg-green-50' : 'bg-red-50');
+                        const textarea = questionDiv.querySelector('textarea');
+                        textarea.disabled = true;
+                        
+                        // Add feedback message
+                        const feedbackDiv = document.createElement('div');
+                        feedbackDiv.className = `mt-2 p-2 rounded ${result.correct ? 'text-green-700' : 'text-red-700'}`;
+                        feedbackDiv.textContent = result.correct ? 'Correct!' : 'Incorrect';
+                        questionDiv.appendChild(feedbackDiv);
+                    }
+                }
+            });
             
-            // This is a placeholder - actual results would come from the API
-            resultsContent.innerHTML = `
-                <div class="space-y-4">
-                    <p class="text-xl">Your exam has been submitted successfully.</p>
-                    <p>Your results will be emailed to you within 24 hours.</p>
+            // Show final score at the top
+            const scoreDiv = document.createElement('div');
+            scoreDiv.className = 'bg-white rounded-lg shadow-lg p-6 mb-6';
+            scoreDiv.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">Exam Results</h2>
+                <div class="grid grid-cols-2 gap-4 text-lg">
+                    <div>
+                        <p>Total Score: <span class="font-bold">${correctAnswers}/${totalQuestions}</span></p>
+                    </div>
+                    <div>
+                        <p>Percentage: <span class="font-bold ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">${scorePercentage}%</span></p>
+                        <p class="text-sm ${scorePercentage >= 70 ? 'text-green-600' : 'text-red-600'}">
+                            ${scorePercentage >= 70 ? 'Passed!' : 'Did not pass - 70% required'}
+                        </p>
+                    </div>
                 </div>
             `;
             
-            resultsScreen.classList.remove('hidden');
+            // Insert score div at the top of the content
+            const examContent = document.getElementById('exam-content');
+            examContent.insertBefore(scoreDiv, examContent.firstChild);
+            
+            // Disable submit button
+            document.getElementById('submit-exam').disabled = true;
+            document.getElementById('submit-exam').classList.add('opacity-50');
         }
 
         // Initialize exam
